@@ -15,6 +15,7 @@
 
                 return true;
             }
+            $('#userId').val(Math.floor(Math.random()*100000));
             $('#testButton').click(function(){
 
                 if (hasLogin()) {
@@ -26,21 +27,7 @@
                 var activityId = $('#activityId').val();
                 socket = io.connect();
                 socket.on('connect', function(){
-                    socket.emit('naviUserLogin', {
-                        userId:userId,
-                        activityId:activityId
-                    });
-
-                    socket.on('logined', function(data){
-                        socket.userId = userId;
-                        socket.activityId = activityId;
-
-                        console.info('login room ok:', data);
-                    });
-
-                    socket.on('naviUserLogined', function(data){
-                        console.info('naviUserLogined:', data);
-                    });
+                    console.info('socket connect ok!');
 
                     socket.on('newLocation', function(data){
                         console.info('receive newLocation:', data);
@@ -57,12 +44,9 @@
             });
 
             $('#updateButton').click(function(){
-                if (!hasLogin()){
-                    console.info('尚未登陆！');
-                    return;
-                }
-
                 socket.emit('newLocation', {
+                    userId:$('#userId').val(),
+                    activityId:$('#activityId').val(),
                     x:Math.random()*100,
                     y:Math.random()*100
                 });

@@ -51,10 +51,7 @@ io.on('connection', function (socket) {
                 console.info('naviUserLogin room user list:', clients);
 
                 // echo current room (all clients) that a person has connected
-                socket.to(data.activityId).emit('naviUserLogined', {
-                    userId:data.userId,
-                    activityId:data.activityId
-                });
+                socket.to(data.activityId).emit('naviUserLogined', data);
             }
         });
 
@@ -65,15 +62,31 @@ io.on('connection', function (socket) {
         console.info('receive newLocation event,data:', data);
 
         if (!socket.userId || !socket.activityId) {
-            console.error('socket param has not set. newLocation data:', data);
-            return;
+
+            //current socket run join command
+            socket.join(data.activityId, function(err){
+                if (err){
+                    console.error('user %s join room %s error:', data.userId, data.activityId, err);
+                } else {
+                    console.info('user %s join room %s ok,data:', data.userId, data.activityId, data);
+
+                    // we store the username in the socket session for this client
+                    socket.userId = data.userId;
+                    socket.activityId = data.activityId;
+
+                    //tell curr user,you have login this room
+                    var clients = get_users_by_room('/', data.activityId);
+                    console.info('naviUserLogin room user list:', clients);
+
+                    // echo current room (all clients) that a person has connected
+                    socket.to(data.activityId).emit('newLocation', data);
+                }
+            });
+        } else {
+            console.info('tell other client in this room new location:', data);
+            // we tell the client to execute 'new message'
+            socket.to(socket.activityId).emit('newLocation', data);
         }
-        // we tell the client to execute 'new message'
-        socket.to(socket.activityId).emit('newLocation', {
-            userId: socket.userId,
-            activityId:socket.activityId,
-            message: data
-        });
     });
 
     // when the user disconnects.. perform this
@@ -81,7 +94,6 @@ io.on('connection', function (socket) {
         console.info('receive disconnect event');
 
         if (!socket.userId || !socket.activityId) {
-            console.error('disconnect socket param has not set. newLocation data:');
             return;
         }
 
