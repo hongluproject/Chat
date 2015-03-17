@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket;
+        $(document).ready(function(){
+            function hasLogin() {
+                if (!socket || !socket.userId || !socket.activityId) {
+                    return false;
+                }
+
+                return true;
+            }
+            $('#testButton').click(function(){
+
+                if (hasLogin()) {
+                    alert('已经登陆！');
+                    return;
+                }
+
+                var userId = $('#userId').val();
+                var activityId = $('#activityId').val();
+                socket = io.connect();
+                socket.on('connect', function(){
+                    socket.emit('naviUserLogin', {
+                        userId:userId,
+                        activityId:activityId
+                    });
+
+                    socket.on('logined', function(data){
+                        socket.userId = userId;
+                        socket.activityId = activityId;
+
+                        console.info('login room ok:', data);
+                    });
+
+                    socket.on('naviUserLogined', function(data){
+                        console.info('naviUserLogined:', data);
+                    });
+
+                    socket.on('newLocation', function(data){
+                        console.info('receive newLocation:', data);
+                    });
+
+                    socket.on('naviUserLeft', function(data){
+                        console.info('receive naviUserLeft:', data);
+                    });
+
+                    socket.on('disconnect', function(){
+                       console.info('receive disconnect');
+                    });
+                });
+            });
+
+            $('#updateButton').click(function(){
+                if (!hasLogin()){
+                    console.info('尚未登陆！');
+                    return;
+                }
+
+                socket.emit('newLocation', {
+                    x:Math.random()*100,
+                    y:Math.random()*100
+                });
+
+            });
+        });
+    </script>
+</head>
+<body>
+<p>
+    userId:<input type="text" id="userId" value="55026106e4b0f9235a497946">
+</p>
+<p>
+    activityId:<input type="text" id="activityId" value="54fd5d9ce4b0ec65c95215cd">
+</p>
+<p>
+    <button type="button" id="testButton">登陆</button>
+    <button type="button" id="updateButton">刷新地理位置</button>
+</p>
+</body>
+</html>
