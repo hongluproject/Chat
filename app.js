@@ -49,7 +49,7 @@ io.on('connection', function (socket) {
 
         //test current user logined
         var clients = get_users_by_room('/', data.activityId);
-        socket.emit('logined', clients);
+        socket.emit('logined'. clients);
         console.info('naviUserLogin room user list:', clients);
 
         // echo current room (all clients) that a person has connected
