@@ -44,19 +44,20 @@ io.on('connection', function (socket) {
                 console.error('user %s join room %s error:', data.userId, data.activityId, err);
             } else {
                 console.info('user %s join room %s ok', data.userId, data.activityId);
+
+                //tell curr user,you have login this room
+                var clients = get_users_by_room('/', data.activityId);
+                socket.emit('logined', clients);
+                console.info('naviUserLogin room user list:', clients);
+
+                // echo current room (all clients) that a person has connected
+                socket.to(data.activityId).emit('naviUserLogined', {
+                    userId:data.userId,
+                    activityId:data.activityId
+                });
             }
         });
 
-        //test current user logined
-        var clients = get_users_by_room('/', data.activityId);
-        socket.emit('logined', clients);
-        console.info('naviUserLogin room user list:', clients);
-
-        // echo current room (all clients) that a person has connected
-        socket.to(data.activityId).emit('naviUserLogined', {
-            userId:data.userId,
-            activityId:data.activityId
-        });
     });
 
     // when the client emits 'new location', this listens and executes
