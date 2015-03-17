@@ -1,1 +1,1 @@
-forever -l ~/.forever/forever.log -o ~/.forever/out.log -e ~/.forever/err.log -w -a app.js
+forever -l ~/.forever/forever.log -o ~/.forever/out.log -e ~/.forever/err.log -w -a start app.js
